@@ -9,15 +9,14 @@
 #include <cstrike>
 #include <nvault>
 
-#define PLUGIN "ChatBan System v2.1 (BUGFIX1)"
-#define VERSION "2.1 (AMXMODX 1.8.2)"
+#define PLUGIN "ChatBan System v2.2"
+#define VERSION "2.2"
 #define AUTHOR "Kalendarky"
 
 #define CREDITS "Belo95135"
 
 new name[32];
 
-new BanHud;
 new iBanTimeRemaining[33];
 new g_iPlayerChatBanTime[33];
 new get_minutes[32];
@@ -25,13 +24,6 @@ new bantime[32];
 
 new g_nVault;
 
-new const cansay[][] =
-{
-	"/rs",
-	"/rank",
-	"/top15",
-	"/totojefixabynepisalotuhlaskusbanompritop15"
-}
 new const Nadavkoreklama[][] = 	
 {
 	"kokot",
@@ -106,8 +98,6 @@ public plugin_init() {
 	register_concmd("amx_chatban", "Chatban_CMD", ADMIN_BAN, "<name or #userid> <minutes> [reason]")
 	register_concmd("amx_unchatban", "Unban_CMD", ADMIN_IMMUNITY, "<name or #userid>")
 	
-	BanHud = CreateHudSyncObj();
-	
 	g_nVault = nvault_open( "chatbanvault" );
 }
 public plugin_end( )
@@ -127,19 +117,12 @@ public chat_madafaka(id)
 	else
 		iBanTimeRemaining[ id ] = 0;
 		
-	for(new i = 0 ; i < sizeof ( cansay ) ; i++) 
+	if(iBanTimeRemaining[id] > 0 && !equal(Speech,"/rs") || iBanTimeRemaining[id] > 0 && !equal(Speech,"/top15") || iBanTimeRemaining[id] > 0 && !equal(Speech,"/rank"))
 	{
-		if(iBanTimeRemaining[id] > 0 && equal(Speech,cansay[i]))
-		{
-			return PLUGIN_CONTINUE;
-		}
-		else if(iBanTimeRemaining[id] > 0 && !equal(Speech,cansay[i]))
-		{
 			ColorChat( id, GREEN, "^1[^4ChatBan^1] ^3Cas na ktory si dostal ban:^4 %d ^3minut (^4 %d ^3sekund)",get_minutes[id], bantime[id]);
 			ColorChat( id, GREEN, "^1[^4ChatBan^1] ^3Mas ban na chat! Zostava:^4 %d ^3sekund",iBanTimeRemaining[ id ]);
-			ColorChat( id, GREEN, "^1[^4ChatBan^1] ^3Prikazy ako ^4/rank, /rs, /top15 ^3su povolene!");
+			ColorChat( id, GREEN, "^1[^4ChatBan^1] ^3Prikazy ^4/rank, /rs, /top15 ^3su povolene!");
 			return PLUGIN_HANDLED;
-		}
 	}
 	for( new i = 0 ; i < sizeof ( Nadavkoreklama ) ; i++)  {
 		if(containi(Speech, Nadavkoreklama[i]) != -1)
@@ -179,8 +162,8 @@ public Chatban_CMD(id, level, cid)
 	
 	if(!is_user_connected(targetid))
 	{
-		set_hudmessage( 255, 25, 60, -1.0, 0.16, 1, 0.03, 3.5, 0.03, 12.0 );
-		ShowSyncHudMsg(id, BanHud,"Chyba, Chat ban nejde dat hracovy^nKtory neni pripojeny!");
+		set_dhudmessage( 255, 25, 60, 0.28, 0.59, 1, 0.03, 3.5, 0.03, 12.0 );
+		show_dhudmessage(id,"Chyba, Chat ban nejde dat hracovy^nKtory neni pripojeny!");
 		return PLUGIN_HANDLED;
 	}
 	
@@ -191,8 +174,8 @@ public Chatban_CMD(id, level, cid)
 		
 	g_iPlayerChatBanTime[targetid] = time() + bantime[targetid]; 
 	
-	set_hudmessage( 255, 25, 60, 0.27, 0.40, 0, 6.0, 12.0);	
-	ShowSyncHudMsg(0,BanHud,"Hrac %s Dostal Chat Ban ^nod Admina: %s ^n Dovod:%s ^n Dlzka:%d minut", name ,admin ,reason, get_minutes[targetid]);
+	set_dhudmessage( 255, 25, 60, 0.28, 0.59, 0, 6.0, 12.0);	
+	show_dhudmessage(0,"Hrac %s Dostal Chat Ban ^nod Admina: %s ^n Dovod:%s ^n Dlzka:%d minut", name ,admin ,reason, get_minutes[targetid]);
 	
 	return PLUGIN_HANDLED;
 }	
@@ -210,8 +193,8 @@ public Unban_CMD(id, level, cid)
 	
 	if(!is_user_connected(targetid))
 	{
-		set_hudmessage(0, 0, 255, 0.14, 0.04, 0, 6.0, 9.0)
-		ShowSyncHudMsg(id, BanHud,"Chyba, UnChatban nejde dat hracovy^nKtory neni pripojeny!")
+		set_dhudmessage(0, 0, 255, 0.28, 0.59, 0, 6.0, 9.0)
+		show_dhudmessage(id,"Chyba, UnChatban nejde dat hracovy^nKtory neni pripojeny!")
 		return PLUGIN_HANDLED;
 	}
 	
@@ -225,8 +208,8 @@ public Unban_CMD(id, level, cid)
 	Save(id)
 	get_user_name(targetid,name,31)
 	
-	set_hudmessage( 255, 25, 60, 0.27, 0.40, 0, 6.0, 12.0);	
-	ShowSyncHudMsg(0,BanHud,"Hrac %s Dostal Unban na Chat ^nod Admina: %s ", name ,admin);
+	set_dhudmessage( 255, 25, 60, 0.28, 0.59, 0, 6.0, 12.0);	
+	show_dhudmessage(0,BanHud,"Hrac %s Dostal Unban na Chat ^nod Admina: %s ", name ,admin);
 	
 	return PLUGIN_HANDLED;
 }
