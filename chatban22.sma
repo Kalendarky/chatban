@@ -1,5 +1,3 @@
-/* LICENSE: https://github.com/Kalendarky/license/blob/master/v1/LICENSE.md */
-
 #include <amxmodx>
 #include <amxmisc>
 #include <dhudmessage>
@@ -11,7 +9,7 @@
 #include <cstrike>
 #include <nvault>
 
-#define PLUGIN "ChatBan System v2.2"
+#define PLUGIN "ChatBan System v2.2_APIUPDATE"
 #define VERSION "2.2"
 #define AUTHOR "Kalendarky"
 
@@ -53,8 +51,8 @@ new const Nadavkoreklama[][] =
 	"napic",
 	"neser",
 	"jebat",
-	"piča",
-	"píča",
+	"piÄŤa",
+	"pĂ­ÄŤa",
 	"vyjeb",
 	"jebu",
 	"dpc",
@@ -101,6 +99,50 @@ public plugin_init() {
 	register_concmd("amx_unchatban", "Unban_CMD", ADMIN_IMMUNITY, "<name or #userid>")
 	
 	g_nVault = nvault_open( "chatbanvault" );
+}
+public plugin_natives()
+{
+	register_library("chatban_v22");
+	register_native("chatban_isbanned", "get_ban");
+	register_native("chatban_getban_time_seconds", "get_ban_time_sec");
+	register_native("chatban_getban_time_minutes", "get_ban_time_min");
+	register_native("chatban_getban_time_remain", "get_ban_time_remain");
+}
+public get_ban(id)
+{
+	if(g_iPlayerChatBanTime[ id ] > 0)
+		iBanTimeRemaining[id] = g_iPlayerChatBanTime[id] - time();
+	else
+		iBanTimeRemaining[ id ] = 0;
+		
+	if(iBanTimeRemaining[id] > 0)
+	{
+		return 1;
+	}
+	else
+		return 0;
+}
+public get_ban_time_sec(id)
+{
+	return bantime[id];
+}
+public get_ban_time_minutes(id)
+{
+	return get_minutes[id];
+}
+public get_ban_time_remain(id)
+{
+	if(g_iPlayerChatBanTime[ id ] > 0)
+		iBanTimeRemaining[id] = g_iPlayerChatBanTime[id] - time();
+	else
+		iBanTimeRemaining[ id ] = 0;
+		
+	if(iBanTimeRemaining[id] > 0)
+	{
+		return iBanTimeRemaining[id];
+	}
+	else
+		return 0;
 }
 public plugin_end( )
 {
@@ -211,7 +253,7 @@ public Unban_CMD(id, level, cid)
 	get_user_name(targetid,name,31)
 	
 	set_dhudmessage( 255, 25, 60, 0.28, 0.59, 0, 6.0, 12.0);	
-	show_dhudmessage(0,BanHud,"Hrac %s Dostal Unban na Chat ^nod Admina: %s ", name ,admin);
+	show_dhudmessage(0,"Hrac %s Dostal Unban na Chat ^nod Admina: %s ", name ,admin);
 	
 	return PLUGIN_HANDLED;
 }
